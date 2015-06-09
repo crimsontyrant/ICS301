@@ -6,14 +6,20 @@ import processing.core.*;
 //change name of class:
 public class PennyPitch extends PApplet
 {
-    GButton btntoss;
+    GButton btntoss, btnnew;
+    GLabel lblpen;
     prizebox p[][] = new prizebox[5][5];
-    int xloc=50, yloc=50;
+    int xloc=50, yloc=50, pen = 20;
     String prize[]={"BALL","MUG","DOLL","HAT","POSTER"};
     
 	public void setup()
 	{
 		size(600, 600, JAVA2D);
+                btntoss = new GButton(this,50,550,100,30);
+                btntoss.setText("Toss Penny");
+                btnnew = new GButton(this,150,550,100,30);
+                btnnew.setText("New Game");
+                btnnew.setEnabled(false);
                 for (int i = 0; i < 5; i++) {
                     for (int j = 0; j < 5; j++) {
                         p[i][j]=new prizebox(xloc,yloc);
@@ -27,9 +33,42 @@ public class PennyPitch extends PApplet
 
 	public void handleButtonEvents(GButton button, GEvent event) 
 	{
-
+            if(button==btntoss){
+                pen--;
+                int rx,ry;
+                rx=(int)random(0,5);
+                ry=(int)random(0,5);
+                p[rx][ry].tossPenny();
+                
+                String won="";
+                if (pen==0){
+                    btntoss.setEnabled(false);
+                    btnnew.setEnabled(true);
+                    for (int x = 0; x < 5; x++) {
+                            if(checkwin(prize[x])==true) won+=prize[x] + " ";
+                        }
+                    if (won=="") won="nothing";
+                    JOptionPane.showMessageDialog(this, "Prizes won: " + won);
+                }
+            }
+            if(button==btnnew) {
+                btntoss.setEnabled(true);
+                btnnew.setEnabled(false);
+                boxclear();
+                setprizes();
+                pen=20;
+            }
 		//code for buttons goes here
-	}		
+	}	
+        
+        public void boxclear(){
+            for (int i = 0; i < 5; i++) {
+                    for (int j = 0; j < 5; j++) {
+                        p[i][j].setPrize("");
+                        p[i][j].clearPenny();
+                    }
+                }
+        }
 
 	public void setprizes(){
             Random r = new Random();
@@ -48,6 +87,17 @@ public class PennyPitch extends PApplet
             }
         }
         
+        boolean checkwin(String prize)
+        {
+            int count=0;
+            for (int i = 0; i < 5; i++) {
+                    for (int j = 0; j < 5; j++) {
+                        if (p[i][j].hasPenny() && p[i][j].getPrize().equals(prize)) count++;
+                    }
+                }
+            return count>=3;
+        }
+        
         public void draw()
 	{
 		background(255); //white
@@ -57,6 +107,7 @@ public class PennyPitch extends PApplet
                         
                     }
                 }
+                text(pen + " pennies left.",260,570);
 	}
 
     class prizebox{
@@ -91,6 +142,11 @@ public class PennyPitch extends PApplet
       void tossPenny()
       {
         p+="X";
+      }
+      
+      void clearPenny()
+      {
+          p="";
       }
 
       boolean hasPenny()
